@@ -29,10 +29,3 @@ export type NightDigest = {
   rows: DigestRow[]; // sorted by job, so the page and the JSON agree by construction
   badLines: number; // lines that did not parse or had the wrong shape: counted, never thrown
 };
-
-// null = no file for that night (the page answers 404). An empty file = { rows: [], badLines: 0 }.
-export function readNight(runsDir: string, night: string): NightDigest | null {
-  void runsDir;
-  void night;
-  throw new Error('not implemented: see issue #2');
-}
