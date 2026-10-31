@@ -1,0 +1,40 @@
+# Preview for review (plan § 3) and its clean-up (plan § 4), ADR 0003.
+# Renders /digest/2026-10-28 into one HTML file and publishes it to GitHub Pages as an
+# artifact, so the preview never lands in git. The lane marker comes from the repository
+# variable LANE_MARKER; delete the variable and re-run to publish the page without it.
+name: preview
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Save /digest/2026-10-28 as one HTML file
+        env:
+          LANE_ID: lane-07
+          LANE_MARKER: ${{ vars.LANE_MARKER }}
+        run: pnpm exec tsx scripts/save-page.ts /digest/2026-10-28 preview/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: preview
+      - id: deploy
+        uses: actions/deploy-pages@v4
